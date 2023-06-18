@@ -14,7 +14,40 @@ using CategoricalArrays
 using Random
 using Missings
 using GLM
-import GLM: @formula, glm
+import GLM: 
+    # types
+    ## Distributions
+    Bernoulli,
+    Binomial,
+    Gamma,
+    Geometric,
+    InverseGaussian,
+    NegativeBinomial,
+    Normal,
+    Poisson,
+
+    ## Link types
+    Link,
+    CauchitLink,
+    CloglogLink,
+    IdentityLink,
+    InverseLink,
+    InverseSquareLink,
+    LogitLink,
+    LogLink,
+    NegativeBinomialLink,
+    PowerLink,
+    ProbitLink,
+    SqrtLink,
+
+    # Model types
+    GeneralizedLinearModel,
+    LinearModel,
+
+    # functions
+    formula,        # extract the formula from a model
+    glm,            # general interface
+    lm             # linear model
 
 include("SurveyDesign.jl")
 include("bootstrap.jl")
