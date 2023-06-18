@@ -1,5 +1,5 @@
 """
-svyglm(formula::FormulaTerm, design::ReplicateDesign, args...; kwargs...)
+glm(formula::FormulaTerm, design::ReplicateDesign, args...; kwargs...)
 
 Perform generalized linear modeling (GLM) using the survey design with replicates.
 
@@ -75,7 +75,7 @@ allprobs: [1.0, 1.0, 1.0  …  1.0]
 type: bootstrap
 replicates: 2000
 
-julia> result = svyglm(@formula(api00 ~ api99), bsrs, Normal())
+julia> result = glm(@formula(api00 ~ api99), bsrs, Normal())
 
 2×2 DataFrame
  Row │ Coefficients  SE
@@ -223,7 +223,7 @@ julia> bsrs.data.sch_wide = ifelse.(bsrs.data.sch_wide .== "Yes", 1, 0)
  1
  1
 
-julia> model = svyglm(@formula(sch_wide ~ meals + ell), bsrs, Binomial(), LogitLink())
+julia> model = glm(@formula(sch_wide ~ meals + ell), bsrs, Binomial(), LogitLink())
 3×2 DataFrame
  Row │ Coefficients  SE
      │ Float64       Float64
@@ -246,7 +246,7 @@ julia> model.SE
 ````
 """
 
-function svyglm(formula::FormulaTerm, design::ReplicateDesign, args...; kwargs...)
+function glm(formula::FormulaTerm, design::ReplicateDesign, args...; kwargs...)
     # Compute estimates for model coefficients
     model = glm(formula, design.data, args...; wts = design.data[!, design.weights], kwargs...)
     main_coefs = coef(model)

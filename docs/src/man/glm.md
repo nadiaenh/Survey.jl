@@ -1,6 +1,6 @@
 # [Generalized Linear Models in Survey](@id manual)
 
-The `svyglm()` function in the Julia Survey package is used to fit generalized linear models (GLMs) to survey data. It incorporates survey design information, such as sampling weights, stratification, and clustering, to produce valid estimates and standard errors that account for the type of survey design.
+The `glm()` function in the Julia Survey package is used to fit generalized linear models (GLMs) to survey data. It incorporates survey design information, such as sampling weights, stratification, and clustering, to produce valid estimates and standard errors that account for the type of survey design.
 
 As of June 2023, the [GLM.jl documentation](https://juliastats.org/GLM.jl/stable/) lists the supported distribution families and their link functions as:
 ```txt
@@ -17,29 +17,31 @@ Refer to the GLM.jl documentation for more information about the GLM package.
 
 ## Fitting a GLM to a Survey Design object
 
-You can fit a GLM to a Survey Design object the same way you would fit it to a regular data frame. The only difference is that you need to specify the survey design object as the second argument to the svyglm() function.
+You can fit a GLM to a Survey Design object the same way you would fit it to a regular data frame. The only difference is that you need to specify the survey design object as the second argument to the glm() function.
 
 ```julia
 using Survey
-apisrs = load_data("apisrs") 
 
 # Simple random sample survey
+apisrs = load_data("apisrs") 
 srs = SurveyDesign(apisrs, weights = :pw) 
 
 # Survey stratified by stype
+apistrat = load_data("apistrat") 
 dstrat = SurveyDesign(apistrat, strata = :stype, weights = :pw) 
 
 # Survey clustered by dnum
+apiclus1 = load_data("apiclus1") 
 dclus1 = SurveyDesign(apiclus1, clusters = :dnum, weights = :pw) 
 ```
 
-Once you have the survey design object, you can fit a GLM using the svyglm() function. Specify the formula for the model and the distribution family. 
+Once you have the survey design object, you can fit a GLM using the glm() function. Specify the formula for the model and the distribution family. 
 
-The svyglm() function supports all distribution families supported by GLM.jl, i.e. Bernoulli, Binomial, Gamma, Geometric, InverseGaussian, NegativeBinomial, Normal, and Poisson. 
+The glm() function supports all distribution families supported by GLM.jl, i.e. Bernoulli, Binomial, Gamma, Geometric, InverseGaussian, NegativeBinomial, Normal, and Poisson. 
 
 For example, to fit a GLM with a Binomial distribution and a Logit link function to the `srs` survey design object we created above:
 ```julia
-using Survey
+using Survey, DataFrames
 apisrs = load_data("apisrs") 
 
 # Bootstrapped simple random sample survey design
@@ -51,7 +53,7 @@ rename!(bsrs.data, Symbol("sch.wide") => :sch_wide)
 bsrs.data.sch_wide = ifelse.(bsrs.data.sch_wide .== "Yes", 1, 0)
 
 # Fitting GLM
-model = svyglm(@formula(sch_wide ~ meals + ell), bsrs, family = Binomial(), LogitLink())
+model = glm(@formula(sch_wide ~ meals + ell), bsrs, Binomial(), LogitLink())
 
 # View the coefficients and standard errors
 model.Coefficients
@@ -87,14 +89,14 @@ using Survey
 apisrs = load_data("apisrs")
 srs = SurveyDesign(apisrs, weights = :pw) 
 
-# Rename api.stu to api_stu
-rename!(apisrs, Symbol("api.stu") => :api_stu)
+# Rename sch.wide to sch_wide
+rename!(bsrs.data, Symbol("sch.wide") => :sch_wide)
 
-# Normalize api_stu
-apisrs.api_stu = apisrs.api_stu ./ sum(apisrs.api_stu)
+# Transform yes/no to 0/1
+bsrs.data.sch_wide = ifelse.(bsrs.data.sch_wide .== "Yes", 1, 0)
 
 # Fit the model
-model = glm(@formula(api_stu ~ meals + ell), apisrs, Binomial(), LogitLink())
+model = glm(@formula(sch_wide ~ meals + ell), bsrs, Binomial(), LogitLink())
 ```
 
 ### Gamma with Inverse Link
