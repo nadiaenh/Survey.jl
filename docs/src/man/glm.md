@@ -37,14 +37,25 @@ Once you have the survey design object, you can fit a GLM using the svyglm() fun
 
 The svyglm() function supports all distribution families supported by GLM.jl, i.e. Bernoulli, Binomial, Gamma, Geometric, InverseGaussian, NegativeBinomial, Normal, and Poisson. 
 
-For example, to fit a GLM with a Bernoulli distribution and a Logit link function to the `srs` survey design object we created above:
+For example, to fit a GLM with a Binomial distribution and a Logit link function to the `srs` survey design object we created above:
 ```julia
-formula = @formula(api00 ~ api99)
-my_glm = svyglm(formula, srs, family = Normal())
+using Survey
+apisrs = load_data("apisrs") 
+
+# Bootstrapped simple random sample survey design
+srs = SurveyDesign(apisrs, weights = :pw) 
+bsrs = bootweights(srs, replicates=500)
+
+# Pre-processing
+rename!(bsrs.data, Symbol("sch.wide") => :sch_wide)
+bsrs.data.sch_wide = ifelse.(bsrs.data.sch_wide .== "Yes", 1, 0)
+
+# Fitting GLM
+model = svyglm(@formula(sch_wide ~ meals + ell), bsrs, family = Binomial(), LogitLink())
 
 # View the coefficients and standard errors
-my_glm.Coefficients
-my_glm.SE
+model.Coefficients
+model.SE
 ```
 
 ## Examples
