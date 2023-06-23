@@ -69,7 +69,7 @@ export Bernoulli,
     LinearModel,
 
     # functions
-    formula,        # extract the formula from a model
+    @formula,        # extract the formula from a model
     glm            # general interface
 
 end
